@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gas Agency System (HTML/CSS/JS)</title>
+  <style>
+    :root{
+      --bg:#0b1020;           /* deep slate */
+      --card:#111830;         /* card surface */
+      --muted:#7f8ba3;        /* muted text */
+      --text:#eef3ff;         /* primary text */
+      --accent:#6aa3ff;       /* brand accent */
+      --accent-2:#00d3a7;     /* secondary accent */
+      --danger:#ff5d6e;       /* danger */
+      --warn:#ffb020;         /* warning */
+      --success:#20d084;      /* success */
+      --ring: rgba(106,163,255,.35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.02) inset;
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 80% -100px, #1a2450 0%, transparent 60%),
+                  radial-gradient(1000px 600px at -10% 20%, #152043 0%, transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      letter-spacing:.2px;
+    }
+    a{color:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    .nav{
+      display:flex;gap:14px;align-items:center;justify-content:space-between;
+      padding:14px 18px;margin:18px auto;border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;letter-spacing:.5px}
+    .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#8fe1ff); display:grid;place-items:center;color:#0a1020;font-weight:900;}
+    .muted{color:var(--muted)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{cursor:pointer;border:none;outline:none;padding:10px 14px;border-radius:12px;background:#152042;color:var(--text);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);font-weight:600}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(135deg, var(--accent), #8fe1ff); color:#0a1020;border:none}
+    .btn.success{background:linear-gradient(135deg, var(--success), #9af3cf); color:#0a1020;border:none}
+    .btn.warn{background:linear-gradient(135deg, var(--warn), #ffd08c); color:#0a1020;border:none}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.18)}
+    .grid{display:grid;gap:18px}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media(max-width:860px){.two,.three{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg, #0e142b, #0b1228); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:18px; box-shadow: var(--shadow)}
+    .card h3{margin:6px 0 8px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#131a33;border:1px solid rgba(255,255,255,.08);font-size:12px}
+    .field{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+    .field label{font-size:13px;color:var(--muted)}
+    .input, select, textarea{background:#0c1227;border:1px solid rgba(255,255,255,.08);color:var(--text);padding:12px;border-radius:12px;outline:none}
+    .input:focus, select:focus, textarea:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
+    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .table th{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);text-align:left;padding:10px}
+    .table td{padding:12px;background:#0e1530;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+    .table tr td:first-child{border-left:1px solid rgba(255,255,255,.08);border-top-left-radius:12px;border-bottom-left-radius:12px}
+    .table tr td:last-child{border-right:1px solid rgba(255,255,255,.08);border-top-right-radius:12px;border-bottom-right-radius:12px}
+
+    .kpi{display:flex;align-items:center;gap:12px}
+    .kpi .num{font-weight:800;font-size:24px}
+    .kpi small{color:var(--muted)}
+
+    .hide{display:none !important}
+
+    .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .PENDING{background:#2a2140;color:#d7c5ff;border:1px solid rgba(215,197,255,.25)}
+    .APPROVED{background:#1e2940;color:#a8dcff;border:1px solid rgba(168,220,255,.25)}
+    .DISPATCHED{background:#162e2a;color:#92f1cf;border:1px solid rgba(136,235,191,.35)}
+    .DELIVERED{background:#102b18;color:#a5f5bf;border:1px solid rgba(134,236,170,.35)}
+    .CANCELLED{background:#3a1e2a;color:#ffb5c1;border:1px solid rgba(255,140,160,.35)}
+
+    .toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:1000}
+    .toast .t{background:#0c1227;border:1px solid rgba(255,255,255,.08);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow)}
+
+    .footer{margin:40px 0 20px;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="logo">⛽</div>
+        GasFlow <span class="muted" style="font-weight:600">— Gas Agency System</span>
+      </div>
+      <div class="tabs">
+        <button class="btn" data-tab="home">Home</button>
+        <button class="btn" data-tab="book">Book Gas</button>
+        <button class="btn" data-tab="orders">My Orders</button>
+        <button class="btn" data-tab="admin">Admin</button>
+      </div>
+      <div id="authArea" class="tabs"></div>
+    </div>
+
+    <!-- HOME -->
+    <section id="tab-home" class="grid two">
+      <div class="card">
+        <div class="badge">Fast • Reliable • Cash/UPI</div>
+        <h2 style="margin:8px 0 6px">Welcome to GasFlow</h2>
+        <p class="muted">Book LPG cylinders in seconds, track deliveries, and manage orders — all in one place. This demo stores data in your browser using .</p>
+        <div class="grid three" style="margin-top:14px">
+          <div class="card">
+            <div class="kpi">
+              <div class="num" id="kpiActiveUsers">0</div>
+              <div>
+                <div>Registered Users</div>
+                <small class="muted">All roles</small>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="kpi">
+              <div class="num" id="kpiOpenOrders">0</div>
+              <div>
+                <div>Open Orders</div>
+                <small class="muted">Pending / Approved</small>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="kpi">
+              <div class="num" id="kpiDelivered">0</div>
+              <div>
+                <div>Delivered</div>
+                <small class="muted">All time</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Current Prices & Stock</h3>
+        <p class="muted">Configured in Admin → Pricing. Update anytime.</p>
+        <table class="table" id="priceTable">
+          <thead><tr><th>Type</th><th>Price</th><th>In Stock</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BOOK -->
+    <section id="tab-book" class="card hide">
+      <h3>Book a Cylinder</h3>
+      <div class="grid two">
+        <div>
+          <div class="field">
+            <label>Customer Name</label>
+            <input id="bkName" class="input" placeholder="Your full name" />
+          </div>
+          <div class="field">
+            <label>Delivery Address</label>
+            <textarea id="bkAddress" rows="3" class="input" placeholder="House No, Street, City, Pincode"></textarea>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label>Cylinder Type</label>
+              <select id="bkType">
+                <option value="14.2kg">14.2kg (Domestic)</option>
+                <option value="5kg">5kg (Mini)</option>
+                <option value="19kg">19kg (Commercial)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Quantity</label>
+              <input id="bkQty" type="number" min="1" value="1" class="input" />
+            </div>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label>Preferred Delivery Date</label>
+              <input id="bkDate" type="date" class="input" />
+            </div>
+            <div class="field">
+              <label>Payment Method</label>
+              <select id="bkPay">
+                <option value="COD">Cash on Delivery</option>
+                <option value="UPI">UPI</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Notes (optional)</label>
+            <input id="bkNotes" class="input" placeholder="Landmark, instructions..." />
+          </div>
+          <div>
+            <button class="btn primary" id="btnEstimate">Estimate Price</button>
+            <button class="btn success" id="btnBook">Confirm Booking</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="height:100%">
+            <h3>Estimate</h3>
+            <p class="muted">Based on current pricing and taxes.</p>
+            <div id="estBox">
+              <div class="field"><label>Items</label><div id="estItems" class="badge">—</div></div>
+              <div class="field"><label>Subtotal</label><div id="estSub" class="badge">—</div></div>
+              <div class="field"><label>Delivery</label><div id="estDel" class="badge">—</div></div>
+              <div class="field"><label>Tax (5%)</label><div id="estTax" class="badge">—</div></div>
+              <hr style="border-color:rgba(255,255,255,.1)"/>
+              <div class="field"><label>Total</label><div id="estTot" class="badge" style="background:#0f1f3f;border-color:#3b5bd9">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="tab-orders" class="card hide">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3>My Orders</h3>
+        <div>
+          <input id="orderSearch" class="input" placeholder="Search by ID/type/status" style="width:260px"/>
+        </div>
+      </div>
+      <table class="table" id="myOrdersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="tab-admin" class="grid two hide">
+      <div class="card">
+        <h3>Orders Management</h3>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+          <input id="adminSearch" class="input" placeholder="Search by user/type/status/id" style="flex:1"/>
+          <button id="btnExport" class="btn ghost">Export JSON</button>
+        </div>
+        <table class="table" id="adminOrdersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Delivery ETA</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Pricing & Inventory</h3>
+        <div class="grid two">
+          <div class="field">
+            <label>5kg Price (₹)</label>
+            <input class="input" id="p5" type="number" />
+          </div>
+          <div class="field">
+            <label>5kg Stock</label>
+            <input class="input" id="s5" type="number" />
+          </div>
+          <div class="field">
+            <label>14.2kg Price (₹)</label>
+            <input class="input" id="p14" type="number" />
+          </div>
+          <div class="field">
+            <label>14.2kg Stock</label>
+            <input class="input" id="s14" type="number" />
+          </div>
+          <div class="field">
+            <label>19kg Price (₹)</label>
+            <input class="input" id="p19" type="number" />
+          </div>
+          <div class="field">
+            <label>19kg Stock</label>
+            <input class="input" id="s19" type="number" />
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="btnSavePrice" class="btn success">Save</button>
+          <button id="btnReset" class="btn warn">Reset Defaults</button>
+        </div>
+        <hr style="margin:16px 0;border-color:rgba(255,255,255,.08)"/>
+        <h3>Admin Users</h3>
+        <div class="grid two">
+          <input id="adminAddEmail" class="input" placeholder="Email"/>
+          <button id="btnAddAdmin" class="btn">Add Admin (Local)</button>
+        </div>
+        <small class="muted">This demo has no server. Admins are flagged locally only.</small>
+      </div>
+    </section>
+
+    <div class="footer"> GAS AGENCY SYSTEM </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <template id="authTpl">
+    <button class="btn ghost" id="btnLogin">Login</button>
+    <button class="btn primary" id="btnSignup">Sign Up</button>
+  </template>
+  <template id="userTpl">
+    <span class="badge" id="whoami">—</span>
+    <button class="btn" id="btnLogout">Logout</button>
+  </template>
+
+  <!-- Auth Modals (lightweight) -->
+  <dialog id="dlgAuth" style="border:none;border-radius:16px;background:#0d1330;color:var(--text);padding:0;">
+    <form method="dialog" class="card" style="min-width:340px">
+      <h3 id="dlgTitle">Login</h3>
+      <div class="field"><label>Full Name</label><input id="dlgName" class="input" placeholder="Only for Sign Up"/></div>
+      <div class="field"><label>Email</label><input id="dlgEmail" class="input" placeholder="you@example.com"/></div>
+      <div class="field"><label>Password</label><input id="dlgPass" type="password" class="input" placeholder="••••••••"/></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost">Cancel</button>
+        <button id="dlgSubmit" class="btn primary" value="ok">Continue</button>
+      </div>
+      <small class="muted">Tip: default admin login — admin@gasflow.test / admin123</small>
+    </form>
+  </dialog>
+
+  <script>
+    // ======= Utilities =======
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const toastBox = $('#toast');
+    function toast(msg){
+      const el = document.createElement('div');
+      el.className = 't';
+      el.textContent = msg;
+      toastBox.appendChild(el);
+      setTimeout(()=>{ el.remove(); }, 3200);
+    }
+
+    // ======= Storage Layer (localStorage) =======
+    const DB = {
+      read(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }catch(e){ return fallback; } },
+      write(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+    };
+
+    const NOW = () => new Date().toISOString();
+    const uid = () => Math.random().toString(36).slice(2,10).toUpperCase();
+
+    // ======= Defaults =======
+    const DEFAULT_PRICING = {
+      '5kg':   { price: 450, stock: 30 },
+      '14.2kg':{ price: 950, stock: 50 },
+      '19kg':  { price: 1700, stock: 20 }
+    };
+
+    const STATE = {
+      users: DB.read('users', [
+        { id:'UADMIN', name:'Site Admin', email:'admin@gasflow.test', pass:'admin123', role:'admin' }
+      ]),
+      orders: DB.read('orders', []),
+      pricing: DB.read('pricing', DEFAULT_PRICING),
+      currentUser: DB.read('currentUser', null)
+    };
+
+    function saveAll(){
+      DB.write('users', STATE.users);
+      DB.write('orders', STATE.orders);
+      DB.write('pricing', STATE.pricing);
+      DB.write('currentUser', STATE.currentUser);
+    }
+
+    // ======= Auth UI =======
+    const authArea = $('#authArea');
+    function renderAuth(){
+      authArea.innerHTML = '';
+      if(!STATE.currentUser){
+        authArea.appendChild($('#authTpl').content.cloneNode(true));
+        $('#btnLogin').onclick = ()=> openAuth('login');
+        $('#btnSignup').onclick = ()=> openAuth('signup');
+      } else {
+        const frag = $('#userTpl').content.cloneNode(true);
+        frag.querySelector('#whoami').textContent = `${STATE.currentUser.name} (${STATE.currentUser.role})`;
+        authArea.appendChild(frag);
+        $('#btnLogout').onclick = ()=>{ STATE.currentUser = null; saveAll(); renderAuth(); route('home'); toast('Logged out'); refreshAll(); };
+      }
+    }
+
+    function openAuth(mode){
+      $('#dlgTitle').textContent = mode==='login' ? 'Login' : 'Create Account';
+      $('#dlgName').parentElement.style.display = mode==='signup' ? 'flex' : 'none';
+      const dlg = $('#dlgAuth');
+      dlg.showModal();
+      $('#dlgSubmit').onclick = (e)=>{
+        const val = $('#dlgSubmit').getAttribute('value');
+        // allow close
+      };
+      dlg.addEventListener('close', ()=>{
+        if(dlg.returnValue !== 'ok') return; // cancelled
+        const name = $('#dlgName').value.trim();
+        const email = $('#dlgEmail').value.trim().toLowerCase();
+        const pass = $('#dlgPass').value;
+        if(!email || !pass){ toast('Enter email & password'); return; }
+        if($('#dlgTitle').textContent === 'Create Account'){
+          if(!name){ toast('Enter full name'); return; }
+          if(STATE.users.some(u=>u.email===email)){ toast('Email already registered'); return; }
+          const user = { id: uid(), name, email, pass, role:'user' };
+          STATE.users.push(user); STATE.currentUser = user; saveAll(); renderAuth(); toast('Welcome! Account created.'); refreshAll();
+        } else {
+          const user = STATE.users.find(u=>u.email===email && u.pass===pass);
+          if(!user){ toast('Invalid credentials'); return; }
+          STATE.currentUser = user; saveAll(); renderAuth(); toast('Logged in'); refreshAll();
+        }
+      }, { once:true });
+    }
+
+    // ======= Navigation =======
+    const TABS = ['home','book','orders','admin'];
+    $$('.tabs .btn[data-tab]').forEach(btn=> btn.addEventListener('click', ()=> route(btn.dataset.tab)) );
+    function route(tab){
+      TABS.forEach(t=> $('#tab-'+t).classList.toggle('hide', t!==tab));
+      // guard admin
+      if(tab==='admin' && (!STATE.currentUser || STATE.currentUser.role!=='admin')){
+        toast('Admin access only.'); route('home'); return;
+      }
+      // guard book/orders
+      if((tab==='book' || tab==='orders') && !STATE.currentUser){
+        toast('Please login first.'); openAuth('login'); return;
+      }
+      refreshAll();
+    }
+
+    // ======= Home render =======
+    function renderHome(){
+      const users = STATE.users.length;
+      const open = STATE.orders.filter(o=>['PENDING','APPROVED','DISPATCHED'].includes(o.status)).length;
+      const del = STATE.orders.filter(o=>o.status==='DELIVERED').length;
+      $('#kpiActiveUsers').textContent = users;
+      $('#kpiOpenOrders').textContent = open;
+      $('#kpiDelivered').textContent = del;
+
+      const tbody = $('#priceTable tbody');
+      tbody.innerHTML = '';
+      for(const type of Object.keys(STATE.pricing)){
+        const {price, stock} = STATE.pricing[type];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${type}</td><td>₹${price.toFixed(2)}</td><td>${stock}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // ======= Booking =======
+    function getEstimate(){
+      const type = $('#bkType').value;
+      const qty = Math.max(1, parseInt($('#bkQty').value||'1'));
+      const price = (STATE.pricing[type]?.price||0)*qty;
+      const delivery = 30; // flat
+      const tax = (price+delivery)*0.05;
+      const total = price + delivery + tax;
+      return { items:`${qty} × ${type}`, subtotal:price, delivery, tax, total };
+    }
+
+    function renderEstimate(){
+      const est = getEstimate();
+      $('#estItems').textContent = est.items;
+      $('#estSub').textContent = '₹'+est.subtotal.toFixed(2);
+      $('#estDel').textContent = '₹'+est.delivery.toFixed(2);
+      $('#estTax').textContent = '₹'+est.tax.toFixed(2);
+      $('#estTot').textContent = '₹'+est.total.toFixed(2);
+    }
+
+    $('#btnEstimate').onclick = renderEstimate;
+
+    $('#btnBook').onclick = ()=>{
+      if(!STATE.currentUser){ toast('Login required'); return; }
+      const name = $('#bkName').value.trim();
+      const address = $('#bkAddress').value.trim();
+      const type = $('#bkType').value;
+      const qty = Math.max(1, parseInt($('#bkQty').value||'1'));
+      const date = $('#bkDate').value;
+      const pay = $('#bkPay').value;
+      const notes = $('#bkNotes').value.trim();
+
+      if(!name || !address || !date){ toast('Fill all required fields'); return; }
+      if((STATE.pricing[type]?.stock||0) < qty){ toast('Not enough stock'); return; }
+
+      const est = getEstimate();
+      const order = {
+        id: 'GF-'+uid(),
+        userId: STATE.currentUser.id,
+        userName: name,
+        address,
+        items: [{ type, qty, unit: STATE.pricing[type].price }],
+        subtotal: est.subtotal,
+        delivery: est.delivery,
+        tax: est.tax,
+        total: Math.round(est.total),
+        status: 'PENDING',
+        payment: { method: pay, paid: pay==='UPI' ? false : false, ref: '' },
+        eta: date,
+        notes,
+        createdAt: NOW(),
+        history: [{ at: NOW(), note:'Order created (Pending approval)' }]
+      };
+      STATE.orders.unshift(order);
+      // Reserve stock immediately (soft hold)
+      STATE.pricing[type].stock -= qty;
+      saveAll();
+      toast('Order placed! Awaiting approval.');
+      route('orders');
+      renderOrders();
+      renderHome();
+    };
+
+    // ======= Orders (customer) =======
+    function renderOrders(){
+      const q = $('#orderSearch').value.trim().toLowerCase();
+      const tbody = $('#myOrdersTable tbody');
+      tbody.innerHTML='';
+      const mine = STATE.orders.filter(o=> o.userId === STATE.currentUser?.id);
+      const list = mine.filter(o=> !q || `${o.id} ${o.items.map(i=>i.type).join(' ')} ${o.status}`.toLowerCase().includes(q));
+      for(const o of list){
+        const tr = document.createElement('tr');
+        const itemsTxt = o.items.map(i=> `${i.qty}× ${i.type}`).join(', ');
+        tr.innerHTML = `
+          <td><code>${o.id}</code></td>
+          <td>${itemsTxt}</td>
+          <td>₹${o.total.toFixed(2)}</td>
+          <td><span class="pill ${o.status}">${o.status}</span></td>
+          <td>${o.payment.paid? 'Paid' : o.payment.method}</td>
+          <td>
+            ${o.status==='PENDING'? `<button class="btn warn" data-act="cancel" data-id="${o.id}">Cancel</button>`:''}
+            ${o.payment.method==='UPI' && !o.payment.paid && o.status!=='CANCELLED'? `<button class="btn success" data-act="pay" data-id="${o.id}">Pay UPI</button>`:''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // actions
+      tbody.onclick = (e)=>{
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        const id = btn.dataset.id;
+        const order = STATE.orders.find(o=>o.id===id);
+        if(btn.dataset.act==='cancel'){
+          if(!confirm('Cancel this order?')) return;
+          order.status='CANCELLED';
+          order.history.push({at:NOW(), note:'Cancelled by customer'});
+          // release stock
+          for(const it of order.items){ STATE.pricing[it.type].stock += it.qty; }
+          saveAll(); toast('Order cancelled'); renderOrders(); renderHome();
+        }
+        if(btn.dataset.act==='pay'){
+          // Fake UPI - mark paid
+          order.payment.paid = true;
+          order.payment.ref = 'UPI-'+uid();
+          order.history.push({at:NOW(), note:'UPI payment received'});
+          saveAll(); toast('Payment successful'); renderOrders();
+        }
+      };
+    }
+    $('#orderSearch').addEventListener('input', renderOrders);
+
+    // ======= Admin =======
+    function renderAdmin(){
+      // pricing fields
+      $('#p5').value = STATE.pricing['5kg'].price;
+      $('#s5').value = STATE.pricing['5kg'].stock;
+      $('#p14').value = STATE.pricing['14.2kg'].price;
+      $('#s14').value = STATE.pricing['14.2kg'].stock;
+      $('#p19').value = STATE.pricing['19kg'].price;
+      $('#s19').value = STATE.pricing['19kg'].stock;
+
+      const q = $('#adminSearch').value.trim().toLowerCase();
+      const tbody = $('#adminOrdersTable tbody');
+      tbody.innerHTML='';
+      const list = STATE.orders.filter(o=> !q || `${o.id} ${o.userName} ${o.items.map(i=>i.type).join(' ')} ${o.status}`.toLowerCase().includes(q));
+      for(const o of list){
+        const itemsTxt = o.items.map(i=> `${i.qty}× ${i.type}`).join(', ');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${o.id}</code></td>
+          <td>${o.userName}</td>
+          <td>${itemsTxt}</td>
+          <td>₹${o.total.toFixed(2)}</td>
+          <td><span class="pill ${o.status}">${o.status}</span></td>
+          <td>${o.payment.paid? 'Paid' : o.payment.method}</td>
+          <td>${o.eta||'-'}</td>
+          <td>
+            ${o.status==='PENDING'? `<button class="btn success" data-act="approve" data-id="${o.id}">Approve</button>`:''}
+            ${o.status==='APPROVED'? `<button class="btn" data-act="dispatch" data-id="${o.id}">Dispatch</button>`:''}
+            ${o.status==='DISPATCHED'? `<button class="btn" data-act="deliver" data-id="${o.id}">Mark Delivered</button>`:''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      tbody.onclick = (e)=>{
+        const btn = e.target.closest('button'); if(!btn) return;
+        const id = btn.dataset.id;
+        const order = STATE.orders.find(x=>x.id===id);
+        if(btn.dataset.act==='approve'){
+          order.status='APPROVED'; order.history.push({at:NOW(), note:'Approved by admin'}); saveAll(); toast('Approved'); renderAdmin(); renderOrders();
+        }
+        if(btn.dataset.act==='dispatch'){
+          order.status='DISPATCHED'; order.history.push({at:NOW(), note:'Dispatched from warehouse'}); saveAll(); toast('Dispatched'); renderAdmin(); renderOrders();
+        }
+        if(btn.dataset.act==='deliver'){
+          order.status='DELIVERED'; order.history.push({at:NOW(), note:'Delivered to customer'}); saveAll(); toast('Delivered'); renderAdmin(); renderOrders(); renderHome();
+        }
+      };
+    }
+
+    $('#btnSavePrice').onclick = ()=>{
+      STATE.pricing['5kg'].price = Number($('#p5').value||0);
+      STATE.pricing['5kg'].stock = Number($('#s5').value||0);
+      STATE.pricing['14.2kg'].price = Number($('#p14').value||0);
+      STATE.pricing['14.2kg'].stock = Number($('#s14').value||0);
+      STATE.pricing['19kg'].price = Number($('#p19').value||0);
+      STATE.pricing['19kg'].stock = Number($('#s19').value||0);
+      saveAll(); toast('Pricing & stock saved'); renderHome();
+    };
+
+    $('#btnReset').onclick = ()=>{ STATE.pricing = JSON.parse(JSON.stringify(DEFAULT_PRICING)); saveAll(); toast('Reset to defaults'); renderHome(); renderAdmin(); };
+
+    $('#btnAddAdmin').onclick = ()=>{
+      const email = $('#adminAddEmail').value.trim().toLowerCase();
+      const user = STATE.users.find(u=>u.email===email);
+      if(!user){ toast('User not found'); return; }
+      user.role = 'admin'; saveAll(); toast('Admin role granted'); renderAuth();
+    };
+
+    $('#adminSearch').addEventListener('input', renderAdmin);
+    $('#btnExport').onclick = ()=>{
+      const blob = new Blob([JSON.stringify({ users:STATE.users, orders:STATE.orders, pricing:STATE.pricing }, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = 'gasflow-export.json'; a.click(); URL.revokeObjectURL(url);
+    };
+
+    // ======= Refresh all views =======
+    function refreshAll(){ renderHome(); renderEstimate(); if(STATE.currentUser) renderOrders(); if(STATE.currentUser?.role==='admin') renderAdmin(); }
+
+    // ======= Init =======
+    renderAuth();
+    route('home');
+    refreshAll();
+  </script>
+</body>
+</html>
